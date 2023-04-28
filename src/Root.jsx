@@ -7,10 +7,11 @@ const Root = () => {
     const [todos,setTodos]=useState([])
 
     useEffect(()=>{
-        const q=query(collection(db,"todos"))
+        const q=query(collection(db,"Books"))
         const unsubscribe = onSnapshot(q,(querySnapshot)=>{
             let todosArray=[];
             querySnapshot.forEach((doc)=>{
+                console.log(doc.data())
                 todosArray.push({...doc.data(),id:doc.id});
             })
             setTodos(todosArray)
@@ -22,7 +23,6 @@ const Root = () => {
     const handleTodoAdded=(e)=>{
         e.preventDefault();
     }
-
   return (
     <div className='text-center w-[80%] mx-auto bg-red-600 h-[60vh]'>
         <h1 className='text-white mb-3 '>my todos </h1>
@@ -34,9 +34,7 @@ const Root = () => {
             <p className='text-[#222] font-semibold'>learn react</p>
             <img className='h-4 cursor-pointer ' src={trash}  />
         </div>
-        {todos.map((todo)=>{
-            console.log(todo)
-        })}
+       
     </div>
   )
 }
