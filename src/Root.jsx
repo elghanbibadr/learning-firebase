@@ -1,22 +1,33 @@
 import React ,{useState,useEffect} from 'react'
 import { db } from './FireBase'
-import { collection, onSnapshot, query,addDoc, doc,getDocs } from 'firebase/firestore'
+import { collection, onSnapshot, query,addDoc, doc,getDocs,deleteDoc } from 'firebase/firestore'
 import trash from "../src/trash-solid.svg";
 
 const Root = () => {
     const [todos,setTodos]=useState([])
     const [taskTitle,setTaskTitle]=useState("")
     const [loading,setLoading]=useState(false)
+    const [deleteClicked,setDeletedClicked]=useState(false)
 
     const handleTaskChanges=(e) => {
-        if (!taskTitle){
-            alert('please enter a task title')
-             return
-        }
+        
+       
 
         setTaskTitle(e.target.value)
     }
 
+      // delete todo
+      const handleDelete = async (e) => {
+        setDeletedClicked(true)
+        const deletedTodo=e.currentTarget.parentElement;
+        try {
+          await deleteDoc(doc(db, "todo", deletedTodo.id));
+          console.log("Document successfully deleted!");
+        } catch (e) {
+          console.error("Error removing document: ", e);
+        }
+        setDeletedClicked(false)
+      };
 
     // fetch data
     useEffect(() => {
@@ -37,11 +48,15 @@ const Root = () => {
           setLoading(false)
         };
         fetchTodos();
-      }, []);
+      }, [deleteClicked]);
 
     // add data
     const handleTodoAdded=async(e)=>{
         e.preventDefault();
+        if (taskTitle===""){
+            alert('please enter a task title')
+             return
+        }
          try {
       const docRef = await addDoc(collection(db, "todo"), {
         task: taskTitle,
@@ -52,6 +67,8 @@ const Root = () => {
     setTaskTitle("");
     }
 
+  
+
   return (
     <div className='text-center w-[80%] py-10 mx-auto bg-red-600 '>
         <h1 className='text-white mb-3 '>my todos </h1>
@@ -61,14 +78,13 @@ const Root = () => {
         </form>
         {loading && <h1>loading ...</h1>}
         { !loading &&  todos.length===0 && <h2 className='text-white font-semibold'>there is no todo</h2>}
-        { !loading &&  todos.length !==0 &&   todos.map(({ task})=>{
-            return  <div className='text-black flex justify-between items-center px-4 py-3 m-4 bg-white'>
+        { !loading &&  todos.length !==0 &&   todos.map(({ task,id})=>{
+            return  <div id={id} className='text-black flex justify-between items-center px-4 py-3 m-4 bg-white'>
             <p className='text-black font-semibold'>{task}</p>
-            <img className='h-4 cursor-pointer ' src={trash}  />
+            <img className='h-4 cursor-pointer ' onClick={handleDelete} src={trash}  />
         </div>
         })}
 
-        {console.log(todos)}
        
        
     </div>
